@@ -3,7 +3,7 @@
 #include <avr/sleep.h>
 #include <Arduino.h>
 
-#define DEBUG_NUBIX(...) Serial.println( __VA_ARGS__ )
+//#define DEBUG_NUBIX(...) Serial.println( __VA_ARGS__ )
 
 #ifndef DEBUG_NUBIX
 #define DEBUG_NUBIX(...)
@@ -64,8 +64,8 @@ void sleepNow() {
     detachInterrupt(0);      // disables interrupt 0 on pin 2 so the wakeUpNow code will not be executed during normal running time.
 }
 
-int getChannel () {
-  int ret = 0;
+byte getChannel () {
+  byte ret = 0;
   ret += digitalRead (8);
   ret += digitalRead (7) * 2;
   ret += digitalRead (6) * 4;
@@ -75,8 +75,8 @@ int getChannel () {
   return ret;
 }
 
-int getAddress () {
-  int ret = 0;
+byte getAddress () {
+  byte ret = 0;
   ret += digitalRead (A0);
   ret += digitalRead (A1) * 2;
   ret += digitalRead (A2) * 4;
@@ -117,18 +117,20 @@ void setup() {
 void loop() {
   sleepNow();     // sleep function called here
   radio.powerUp(); 
-  int channel = getChannel ();  
-  int address = getAddress ();
+  byte channel = getChannel ();  
+  byte address = getAddress ();
   DEBUG_NUBIX (channel);
   DEBUG_NUBIX (address);
+  
   memset (master,0,6);
   master[0]='N';
-  master[2]=address;
+  master[1]=address;
   radio.setChannel (channel);
   radio.openWritingPipe(master);
   long battery = readVcc();
   DEBUG_NUBIX (battery);
   radio.write( &battery, sizeof(long) );
   radio.powerDown();
+  
 } // Loop
 
